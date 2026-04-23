@@ -1,0 +1,15 @@
+{
+  "twitter": {
+    "accounts": ["AnthropicAI", "elaboratedcode", "ThePrimeagen", "levelsio"],
+    "keywords": ["AI", "web development", "typescript"],
+    "maxTweetsPerAccount": 20,
+    "maxTweetsPerKeyword": 30
+  },
+  "newsletter": {
+    "title": "Tech Newsletter",
+    "maxAge": "24h"
+  },
+  "telegram": {
+    "chatIds": []
+  }
+}
