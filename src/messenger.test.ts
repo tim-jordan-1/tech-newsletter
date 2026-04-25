@@ -1,0 +1,73 @@
+import { test, describe } from 'node:test';
+import assert from 'node:assert/strict';
+import { formatTelegramMessage } from './messenger.js';
+import type { NewsletterData } from './types.js';
+
+const sampleData: NewsletterData = {
+  title: 'Tech Weekly',
+  date: '2026-04-25',
+  edition: 42,
+  tldr: 'Big things happened.',
+  sections: [
+    {
+      category: 'AI',
+      summary: 'AI keeps moving fast.',
+      tweetLinks: [
+        { author: 'sama', url: 'https://x.com/sama/1', text: 'tweet text' },
+        { author: 'karpathy', url: 'https://x.com/karpathy/2', text: 'another tweet' },
+        { author: 'ylecun', url: 'https://x.com/ylecun/3', text: 'more tweet' },
+        { author: 'extra', url: 'https://x.com/extra/4', text: 'should not appear' },
+      ],
+    },
+  ],
+};
+
+describe('formatTelegramMessage', () => {
+  test('includes title, date, and edition', () => {
+    const msg = formatTelegramMessage(sampleData);
+    assert.ok(msg.includes('Tech Weekly'));
+    assert.ok(msg.includes('2026-04-25'));
+    assert.ok(msg.includes('Edition #42'));
+  });
+
+  test('includes tldr', () => {
+    const msg = formatTelegramMessage(sampleData);
+    assert.ok(msg.includes('Big things happened.'));
+  });
+
+  test('includes section category and summary', () => {
+    const msg = formatTelegramMessage(sampleData);
+    assert.ok(msg.includes('AI'));
+    assert.ok(msg.includes('AI keeps moving fast.'));
+  });
+
+  test('includes at most 3 tweet links per section', () => {
+    const msg = formatTelegramMessage(sampleData);
+    assert.ok(msg.includes('@sama'));
+    assert.ok(msg.includes('@karpathy'));
+    assert.ok(msg.includes('@ylecun'));
+    assert.ok(!msg.includes('@extra'));
+  });
+
+  test('truncates long summaries to 500 characters', () => {
+    const longSummary = 'x'.repeat(600);
+    const data: NewsletterData = {
+      ...sampleData,
+      sections: [{ category: 'Long', summary: longSummary, tweetLinks: [] }],
+    };
+    const msg = formatTelegramMessage(data);
+    assert.ok(msg.includes('...'));
+    assert.ok(!msg.includes('x'.repeat(600)));
+  });
+
+  test('does not truncate summaries under 500 characters', () => {
+    const shortSummary = 'y'.repeat(499);
+    const data: NewsletterData = {
+      ...sampleData,
+      sections: [{ category: 'Short', summary: shortSummary, tweetLinks: [] }],
+    };
+    const msg = formatTelegramMessage(data);
+    assert.ok(msg.includes('y'.repeat(499)));
+    assert.ok(!msg.includes('...'));
+  });
+});

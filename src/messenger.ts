@@ -1,9 +1,9 @@
-import TelegramBot from 'node-telegram-bot-api';
+// src/messenger.ts
 import { readFileSync } from 'fs';
 import type { NewsletterData } from './types.js';
 import { getEnvOrThrow } from './config.js';
 
-function formatTelegramMessage(data: NewsletterData): string {
+export function formatTelegramMessage(data: NewsletterData): string {
   let msg = `<b>🗞 ${data.title} — ${data.date}</b>\n`;
   msg += `<i>Edition #${data.edition}</i>\n\n`;
   msg += `<b>TL;DR:</b> ${data.tldr}\n`;
@@ -24,25 +24,39 @@ function formatTelegramMessage(data: NewsletterData): string {
   return msg;
 }
 
+async function telegramPost(token: string, method: string, body: BodyInit, contentType?: string): Promise<void> {
+  const url = `https://api.telegram.org/bot${token}/${method}`;
+  const headers: Record<string, string> = contentType ? { 'Content-Type': contentType } : {};
+  const res = await fetch(url, { method: 'POST', headers, body });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Telegram ${method} failed (${res.status}): ${text}`);
+  }
+}
+
 export async function sendTelegram(
   data: NewsletterData,
   htmlFilePath: string,
   chatIds: string[]
 ): Promise<void> {
   const token = getEnvOrThrow('TELEGRAM_BOT_TOKEN');
-  const bot = new TelegramBot(token);
-
   const message = formatTelegramMessage(data);
 
   for (const chatId of chatIds) {
     try {
-      await bot.sendMessage(chatId, message, { parse_mode: 'HTML' });
+      await telegramPost(
+        token,
+        'sendMessage',
+        JSON.stringify({ chat_id: chatId, text: message, parse_mode: 'HTML' }),
+        'application/json'
+      );
 
       const fileBuffer = readFileSync(htmlFilePath);
-      await bot.sendDocument(chatId, fileBuffer, {}, {
-        filename: htmlFilePath.split('/').pop() ?? 'newsletter.html',
-        contentType: 'text/html',
-      });
+      const filename = htmlFilePath.split('/').pop() ?? 'newsletter.html';
+      const form = new FormData();
+      form.append('chat_id', chatId);
+      form.append('document', new Blob([fileBuffer], { type: 'text/html' }), filename);
+      await telegramPost(token, 'sendDocument', form);
 
       console.log(`Messenger: sent to chat ${chatId}`);
     } catch (err) {
