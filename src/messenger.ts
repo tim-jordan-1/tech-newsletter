@@ -41,6 +41,8 @@ export async function sendTelegram(
 ): Promise<void> {
   const token = getEnvOrThrow('TELEGRAM_BOT_TOKEN');
   const message = formatTelegramMessage(data);
+  const fileBuffer = readFileSync(htmlFilePath);
+  const filename = htmlFilePath.split('/').pop() ?? 'newsletter.html';
 
   for (const chatId of chatIds) {
     try {
@@ -51,8 +53,6 @@ export async function sendTelegram(
         'application/json'
       );
 
-      const fileBuffer = readFileSync(htmlFilePath);
-      const filename = htmlFilePath.split('/').pop() ?? 'newsletter.html';
       const form = new FormData();
       form.append('chat_id', chatId);
       form.append('document', new Blob([fileBuffer], { type: 'text/html' }), filename);
