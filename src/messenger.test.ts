@@ -76,6 +76,7 @@ describe('formatTelegramMessage', () => {
 describe('sendTelegram', () => {
   test('calls sendMessage and sendDocument for each chatId', async (t) => {
     process.env.TELEGRAM_BOT_TOKEN = 'test-token';
+    t.after(() => { delete process.env.TELEGRAM_BOT_TOKEN; });
 
     const calls: { url: string; method: string }[] = [];
     t.mock.method(globalThis, 'fetch', async (url: string, opts: RequestInit) => {
@@ -103,6 +104,7 @@ describe('sendTelegram', () => {
 
   test('continues to next chatId when one fails', async (t) => {
     process.env.TELEGRAM_BOT_TOKEN = 'test-token';
+    t.after(() => { delete process.env.TELEGRAM_BOT_TOKEN; });
 
     let callCount = 0;
     t.mock.method(globalThis, 'fetch', async () => {
@@ -116,6 +118,9 @@ describe('sendTelegram', () => {
 
     // Should not throw even if first chat fails
     await assert.doesNotReject(() => sendTelegram(sampleData, tmpFile, ['chat1', 'chat2']));
+
+    // Verify processing continued to chat2 after chat1 failed
+    assert.ok(callCount >= 2);
 
     unlinkSync(tmpFile);
   });
