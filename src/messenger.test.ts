@@ -71,6 +71,17 @@ describe('formatTelegramMessage', () => {
     assert.ok(msg.includes('y'.repeat(499)));
     assert.ok(!msg.includes('...'));
   });
+
+  test('does not truncate summaries at exactly 500 characters', () => {
+    const exactSummary = 'z'.repeat(500);
+    const data: NewsletterData = {
+      ...sampleData,
+      sections: [{ category: 'Exact', summary: exactSummary, tweetLinks: [] }],
+    };
+    const msg = formatTelegramMessage(data);
+    assert.ok(msg.includes('z'.repeat(500)));
+    assert.ok(!msg.includes('...'));
+  });
 });
 
 describe('sendTelegram', () => {
@@ -120,8 +131,20 @@ describe('sendTelegram', () => {
     await assert.doesNotReject(() => sendTelegram(sampleData, tmpFile, ['chat1', 'chat2']));
 
     // Verify processing continued to chat2 after chat1 failed
-    assert.ok(callCount >= 2);
+    // chat1's sendMessage fails (count=1), chat2's sendMessage succeeds (count=2), chat2's sendDocument succeeds (count=3)
+    assert.equal(callCount, 3);
 
     unlinkSync(tmpFile);
+  });
+
+  test('throws when htmlFilePath does not exist', async (t) => {
+    process.env.TELEGRAM_BOT_TOKEN = 'test-token';
+    t.after(() => { delete process.env.TELEGRAM_BOT_TOKEN; });
+    t.mock.method(globalThis, 'fetch', async () => ({ ok: true }));
+
+    await assert.rejects(
+      () => sendTelegram(sampleData, '/tmp/does-not-exist-xyz.html', ['chat1']),
+      { code: 'ENOENT' }
+    );
   });
 });
