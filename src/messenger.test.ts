@@ -1,6 +1,7 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { formatTelegramMessage } from './messenger.js';
+import { writeFileSync, unlinkSync } from 'node:fs';
+import { formatTelegramMessage, sendTelegram } from './messenger.js';
 import type { NewsletterData } from './types.js';
 
 const sampleData: NewsletterData = {
@@ -69,5 +70,53 @@ describe('formatTelegramMessage', () => {
     const msg = formatTelegramMessage(data);
     assert.ok(msg.includes('y'.repeat(499)));
     assert.ok(!msg.includes('...'));
+  });
+});
+
+describe('sendTelegram', () => {
+  test('calls sendMessage and sendDocument for each chatId', async (t) => {
+    process.env.TELEGRAM_BOT_TOKEN = 'test-token';
+
+    const calls: { url: string; method: string }[] = [];
+    t.mock.method(globalThis, 'fetch', async (url: string, opts: RequestInit) => {
+      calls.push({ url: String(url), method: String(opts.method) });
+      return { ok: true };
+    });
+
+    const tmpFile = '/tmp/test-newsletter.html';
+    writeFileSync(tmpFile, '<html>test</html>');
+
+    await sendTelegram(sampleData, tmpFile, ['chat1', 'chat2']);
+
+    unlinkSync(tmpFile);
+
+    // 2 chats × 2 calls each = 4 total
+    assert.equal(calls.length, 4);
+
+    const sendMessageCalls = calls.filter(c => c.url.includes('sendMessage'));
+    const sendDocumentCalls = calls.filter(c => c.url.includes('sendDocument'));
+    assert.equal(sendMessageCalls.length, 2);
+    assert.equal(sendDocumentCalls.length, 2);
+
+    assert.ok(sendMessageCalls[0].url.includes('test-token'));
+  });
+
+  test('continues to next chatId when one fails', async (t) => {
+    process.env.TELEGRAM_BOT_TOKEN = 'test-token';
+
+    let callCount = 0;
+    t.mock.method(globalThis, 'fetch', async () => {
+      callCount++;
+      if (callCount === 1) return { ok: false, text: async () => 'Bad Request' };
+      return { ok: true };
+    });
+
+    const tmpFile = '/tmp/test-newsletter-2.html';
+    writeFileSync(tmpFile, '<html>test</html>');
+
+    // Should not throw even if first chat fails
+    await assert.doesNotReject(() => sendTelegram(sampleData, tmpFile, ['chat1', 'chat2']));
+
+    unlinkSync(tmpFile);
   });
 });
