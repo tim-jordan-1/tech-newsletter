@@ -1,4 +1,3 @@
-// src/claude-cli.test.ts
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { callClaude } from './claude-cli.js';
@@ -12,13 +11,16 @@ describe('callClaude', () => {
     assert.equal(result, 'summary text');
   });
 
-  test('passes prompt as -p argument', async () => {
+  test('passes prompt as -p argument to claude executable', async () => {
+    let capturedFile = '';
     let capturedArgs: string[] = [];
-    const fake: FakeExecFile = (_file, args, cb) => {
+    const fake: FakeExecFile = (file, args, cb) => {
+      capturedFile = file;
       capturedArgs = args;
       cb(null, 'response', '');
     };
     await callClaude('my prompt', fake);
+    assert.equal(capturedFile, 'claude');
     assert.deepEqual(capturedArgs, ['-p', 'my prompt']);
   });
 
@@ -27,7 +29,7 @@ describe('callClaude', () => {
     const fake: FakeExecFile = (_file, _args, cb) => cb(enoent, '', '');
     await assert.rejects(
       () => callClaude('test prompt', fake),
-      /claude CLI not found/
+      /claude CLI not found — is Claude Code/
     );
   });
 
