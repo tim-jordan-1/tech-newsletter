@@ -30,7 +30,7 @@ program
         return;
       }
 
-      console.log('Step 2/4: Summarizing with Claude Haiku...');
+      console.log('Step 2/4: Summarizing with Claude...');
       const { tldr, sections } = await summarizeTweets(tweets, config.twitter.keywords);
 
       console.log('Step 3/4: Rendering newsletter...');
