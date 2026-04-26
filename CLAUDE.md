@@ -27,6 +27,8 @@ Tests use Node.js built-in `node:test` and `node:assert/strict` — not Jest or 
 
 ## Environment Setup
 
+Prerequisite: install and authenticate the Claude Code CLI (`claude --version` to verify). The summarizer calls `claude -p` using your local Pro OAuth session — no API key needed.
+
 Copy `.env.example` to `.env` and populate:
 
 - `TWITTER_COOKIES` — JSON array of Twitter/X cookies (exported from browser DevTools). Must be a valid logged-in session.
@@ -60,4 +62,4 @@ Edit `config.json` to change behavior without touching code:
 - `newsletter.maxAge` — how far back to collect tweets, e.g. `"24h"` or `"30m"`
 - `telegram.chatIds` — list of Telegram chat IDs to deliver to (empty = skip delivery)
 
-The `.edition` counter file lives at the project root (`./.edition`) and is not gitignored — it persists across runs to track monotonically increasing edition numbers.
+The `.edition` counter file lives at the project root (`./.edition`) and is gitignored — it is local-only and resets to 1 on a fresh clone.
