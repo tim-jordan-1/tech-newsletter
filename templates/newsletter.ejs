@@ -5,128 +5,243 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= title %> — <%= date %></title>
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: Georgia, 'Times New Roman', serif;
-      max-width: 680px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 480px;
       margin: 0 auto;
-      padding: 40px 20px;
-      background: #f9f9f9;
+      padding: 20px 14px 40px;
+      background: #f5f5f7;
       color: #1a1a1a;
-      line-height: 1.7;
     }
-    .header {
+    .nl-header {
       text-align: center;
-      border-bottom: 3px solid #1a1a1a;
-      padding-bottom: 20px;
-      margin-bottom: 30px;
+      margin-bottom: 16px;
+      padding: 8px 0;
     }
-    .header h1 {
-      font-size: 32px;
-      margin: 0 0 8px 0;
-      letter-spacing: -0.5px;
-    }
-    .header .meta {
-      color: #666;
-      font-size: 14px;
-    }
-    .tldr {
-      background: #f0f0f0;
-      border-left: 4px solid #1a1a1a;
-      padding: 16px 20px;
-      margin-bottom: 30px;
-      font-style: italic;
-    }
-    .tldr h2 {
-      font-size: 16px;
-      margin: 0 0 8px 0;
-      font-style: normal;
-    }
-    .section {
-      margin-bottom: 30px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid #e0e0e0;
-    }
-    .section:last-child {
-      border-bottom: none;
-    }
-    .section h2 {
+    .nl-header h1 {
       font-size: 22px;
-      margin: 0 0 12px 0;
+      font-weight: 800;
+      letter-spacing: -0.5px;
       color: #1a1a1a;
     }
-    .section p {
-      margin: 0 0 12px 0;
-      font-size: 16px;
+    .nl-header .meta {
+      font-size: 11px;
+      color: #999;
+      margin-top: 4px;
     }
-    .tweet-links {
-      margin-top: 16px;
+
+    /* Table of Contents */
+    .toc-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
     }
-    .tweet-links h3 {
-      font-size: 13px;
+    .toc-label {
+      font-size: 10px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #888;
-      margin: 0 0 8px 0;
+      letter-spacing: 1.5px;
+      color: #1a56db;
+      margin-bottom: 10px;
     }
-    .tweet-link {
-      display: block;
-      padding: 8px 0;
-      border-top: 1px solid #f0f0f0;
-      font-size: 14px;
-      color: #444;
+    .toc-category {
+      margin-bottom: 8px;
+    }
+    .toc-category:last-child {
+      margin-bottom: 0;
+    }
+    .toc-cat-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: #1a56db;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .toc-items {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 3px;
+    }
+    .toc-items li {
+      font-size: 12px;
+      color: #555;
+      line-height: 1.5;
+      padding-left: 12px;
+      position: relative;
+    }
+    .toc-items li::before {
+      content: "·";
+      position: absolute;
+      left: 3px;
+      color: #999;
+      font-weight: 700;
+    }
+    .toc-items a {
+      color: #555;
       text-decoration: none;
     }
-    .tweet-link:hover {
-      color: #1a1a1a;
+    .toc-items a:hover {
+      color: #1a56db;
     }
-    .tweet-link .author {
-      font-weight: bold;
-      color: #1a1a1a;
+
+    /* TL;DR */
+    .tldr-card {
+      background: #1a56db;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
     }
-    .footer {
+    .tldr-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #a8c4ff;
+      margin-bottom: 7px;
+    }
+    .tldr-card p {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #fff;
+    }
+
+    /* Category Header */
+    .category-header {
+      background: #1a56db;
+      border-radius: 12px;
+      padding: 10px 16px;
+      margin-bottom: 8px;
+      margin-top: 16px;
+    }
+    .category-header h2 {
+      font-size: 14px;
+      font-weight: 800;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Story Card */
+    .story-card {
+      background: white;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      overflow: hidden;
+      padding: 14px 16px;
+    }
+    .story-headline {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1a1a1a;
+      line-height: 1.35;
+      margin-bottom: 8px;
+    }
+    .story-bullets {
+      list-style: none;
+      padding: 0;
+    }
+    .story-bullets li {
+      font-size: 13px;
+      line-height: 1.55;
+      color: #333;
+      padding-left: 16px;
+      position: relative;
+      margin-bottom: 4px;
+    }
+    .story-bullets li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #1a56db;
+      font-weight: 700;
+    }
+    .story-sources {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .chip {
+      font-size: 11px;
+      background: #f2f2f2;
+      color: #444;
+      padding: 3px 9px;
+      border-radius: 99px;
+      text-decoration: none;
+    }
+    .chip:hover {
+      background: #e8f0fe;
+      color: #1a56db;
+    }
+
+    .nl-footer {
       text-align: center;
-      color: #999;
-      font-size: 12px;
-      margin-top: 40px;
-      padding-top: 20px;
-      border-top: 1px solid #e0e0e0;
-    }
-    a {
-      color: #1a7bc0;
+      font-size: 11px;
+      color: #bbb;
+      margin-top: 16px;
     }
   </style>
 </head>
 <body>
-  <div class="header">
+<% function slugify(s) { return s.toLowerCase().replace(/\s+/g, '-'); } %>
+
+  <div class="nl-header">
     <h1><%= title %></h1>
     <div class="meta"><%= date %> &middot; Edition #<%= edition %></div>
   </div>
 
-  <div class="tldr">
-    <h2>TL;DR</h2>
+  <!-- Table of Contents -->
+  <div class="toc-card">
+    <div class="toc-label">In This Issue</div>
+    <% for (const section of sections) { %>
+    <% const tocSlug = slugify(section.category); %>
+    <div class="toc-category">
+      <span class="toc-cat-name"><%= section.category %></span>
+      <ul class="toc-items">
+        <% for (let i = 0; i < section.stories.length; i++) { %>
+        <li><a href="#<%= tocSlug %>-<%= i %>"><%= section.stories[i].headline %></a></li>
+        <% } %>
+      </ul>
+    </div>
+    <% } %>
+  </div>
+
+  <!-- TL;DR -->
+  <div class="tldr-card">
+    <div class="tldr-label">TL;DR</div>
     <p><%= tldr %></p>
   </div>
 
+  <!-- Per-category sections -->
   <% for (const section of sections) { %>
-  <div class="section">
+  <% const slug = slugify(section.category); %>
+  <div class="category-header">
     <h2><%= section.category %></h2>
-    <%- section.summary.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('') %>
-
-    <% if (section.tweetLinks.length > 0) { %>
-    <div class="tweet-links">
-      <h3>Sources</h3>
-      <% for (const link of section.tweetLinks) { %>
-      <a class="tweet-link" href="<%= link.url %>" target="_blank">
-        <span class="author">@<%= link.author %></span>: <%= link.text %>
-      </a>
+  </div>
+  <% for (let i = 0; i < section.stories.length; i++) { %>
+  <% const story = section.stories[i]; %>
+  <div class="story-card" id="<%= slug %>-<%= i %>">
+    <div class="story-headline"><%= story.headline %></div>
+    <ul class="story-bullets">
+      <% for (const bullet of story.bullets) { %>
+      <li><%= bullet %></li>
+      <% } %>
+    </ul>
+    <% if (story.sources && story.sources.length > 0) { %>
+    <div class="story-sources">
+      <% for (const source of story.sources) { %>
+      <a class="chip" href="<%= source.url %>" target="_blank">@<%= source.author %></a>
       <% } %>
     </div>
     <% } %>
   </div>
   <% } %>
+  <% } %>
 
-  <div class="footer">
-    Generated by <%= title %>
-  </div>
+  <div class="nl-footer">Generated by <%= title %></div>
 </body>
 </html>
