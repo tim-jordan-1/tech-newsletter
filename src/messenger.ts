@@ -18,7 +18,7 @@ export function formatTelegramMessage(data: NewsletterData): string {
         msg += `• ${bullet}\n`;
       }
 
-      for (const source of story.sources) {
+      for (const source of story.sources.slice(0, 5)) {
         msg += `🔗 <a href="${source.url}">@${source.author}</a>\n`;
       }
     }

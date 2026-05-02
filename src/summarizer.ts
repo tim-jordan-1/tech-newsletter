@@ -61,7 +61,9 @@ async function summarizeCategory(
     const stories: NewsletterStory[] = parsed.stories.map((story) => ({
       headline: story.headline,
       bullets: story.bullets,
-      sources: story.sourceIndices.map((i) => ({ author: tweets[i].author, url: tweets[i].url })),
+      sources: story.sourceIndices
+          .filter((i) => i >= 0 && i < tweets.length)
+          .map((i) => ({ author: tweets[i].author, url: tweets[i].url })),
     }));
     return { category, stories };
   } catch {
