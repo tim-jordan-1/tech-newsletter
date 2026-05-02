@@ -12,12 +12,17 @@ const sampleData: NewsletterData = {
   sections: [
     {
       category: 'AI',
-      summary: 'AI keeps moving fast.',
-      tweetLinks: [
-        { author: 'sama', url: 'https://x.com/sama/1', text: 'tweet text' },
-        { author: 'karpathy', url: 'https://x.com/karpathy/2', text: 'another tweet' },
-        { author: 'ylecun', url: 'https://x.com/ylecun/3', text: 'more tweet' },
-        { author: 'extra', url: 'https://x.com/extra/4', text: 'should not appear' },
+      stories: [
+        {
+          headline: 'AI keeps moving fast',
+          bullets: ['First key point', 'Second key point'],
+          sources: [
+            { author: 'sama', url: 'https://x.com/sama/1' },
+            { author: 'karpathy', url: 'https://x.com/karpathy/2' },
+            { author: 'ylecun', url: 'https://x.com/ylecun/3' },
+            { author: 'extra', url: 'https://x.com/extra/4' },
+          ],
+        },
       ],
     },
   ],
@@ -36,51 +41,79 @@ describe('formatTelegramMessage', () => {
     assert.ok(msg.includes('Big things happened.'));
   });
 
-  test('includes section category and summary', () => {
+  test('includes section category and story headline', () => {
     const msg = formatTelegramMessage(sampleData);
     assert.ok(msg.includes('AI'));
-    assert.ok(msg.includes('AI keeps moving fast.'));
+    assert.ok(msg.includes('AI keeps moving fast'));
   });
 
-  test('includes at most 3 tweet links per section', () => {
+  test('includes all sources for each story', () => {
     const msg = formatTelegramMessage(sampleData);
     assert.ok(msg.includes('@sama'));
     assert.ok(msg.includes('@karpathy'));
     assert.ok(msg.includes('@ylecun'));
-    assert.ok(!msg.includes('@extra'));
+    assert.ok(msg.includes('@extra'));
   });
 
-  test('truncates long summaries to 500 characters', () => {
-    const longSummary = 'x'.repeat(600);
+  test('verifies max 3 stories per section are included', () => {
     const data: NewsletterData = {
       ...sampleData,
-      sections: [{ category: 'Long', summary: longSummary, tweetLinks: [] }],
+      sections: [
+        {
+          category: 'Tech',
+          stories: [
+            {
+              headline: 'Story 1',
+              bullets: ['point'],
+              sources: [{ author: 'author1', url: 'https://x.com/author1/1' }],
+            },
+            {
+              headline: 'Story 2',
+              bullets: ['point'],
+              sources: [{ author: 'author2', url: 'https://x.com/author2/2' }],
+            },
+            {
+              headline: 'Story 3',
+              bullets: ['point'],
+              sources: [{ author: 'author3', url: 'https://x.com/author3/3' }],
+            },
+            {
+              headline: 'Story 4',
+              bullets: ['point'],
+              sources: [{ author: 'author4', url: 'https://x.com/author4/4' }],
+            },
+          ],
+        },
+      ],
     };
     const msg = formatTelegramMessage(data);
-    assert.ok(msg.includes('...'));
-    assert.ok(!msg.includes('x'.repeat(600)));
+    assert.ok(msg.includes('Story 1'));
+    assert.ok(msg.includes('Story 2'));
+    assert.ok(msg.includes('Story 3'));
+    assert.ok(!msg.includes('Story 4'));
   });
 
-  test('does not truncate summaries under 500 characters', () => {
-    const shortSummary = 'y'.repeat(499);
+  test('verifies max 2 bullets per story are included', () => {
     const data: NewsletterData = {
       ...sampleData,
-      sections: [{ category: 'Short', summary: shortSummary, tweetLinks: [] }],
+      sections: [
+        {
+          category: 'Tech',
+          stories: [
+            {
+              headline: 'Multi-bullet story',
+              bullets: ['Bullet 1', 'Bullet 2', 'Bullet 3', 'Bullet 4'],
+              sources: [{ author: 'author', url: 'https://x.com/author/1' }],
+            },
+          ],
+        },
+      ],
     };
     const msg = formatTelegramMessage(data);
-    assert.ok(msg.includes('y'.repeat(499)));
-    assert.ok(!msg.includes('...'));
-  });
-
-  test('does not truncate summaries at exactly 500 characters', () => {
-    const exactSummary = 'z'.repeat(500);
-    const data: NewsletterData = {
-      ...sampleData,
-      sections: [{ category: 'Exact', summary: exactSummary, tweetLinks: [] }],
-    };
-    const msg = formatTelegramMessage(data);
-    assert.ok(msg.includes('z'.repeat(500)));
-    assert.ok(!msg.includes('...'));
+    assert.ok(msg.includes('Bullet 1'));
+    assert.ok(msg.includes('Bullet 2'));
+    assert.ok(!msg.includes('Bullet 3'));
+    assert.ok(!msg.includes('Bullet 4'));
   });
 });
 
