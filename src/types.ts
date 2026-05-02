@@ -42,7 +42,6 @@ export interface NewsletterSection {
 export interface NewsletterData {
   title: string;
   date: string;
-  edition: number;
   tldr: string;
   sections: NewsletterSection[];
 }
