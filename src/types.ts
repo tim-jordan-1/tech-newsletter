@@ -28,10 +28,15 @@ export interface ScrapedTweet {
   timestamp: Date;
 }
 
+export interface NewsletterStory {
+  headline: string;
+  bullets: string[];
+  sources: Array<{ author: string; url: string }>;
+}
+
 export interface NewsletterSection {
   category: string;
-  summary: string;
-  tweetLinks: Array<{ author: string; url: string; text: string }>;
+  stories: NewsletterStory[];
 }
 
 export interface NewsletterData {
