@@ -10,14 +10,17 @@ export function formatTelegramMessage(data: NewsletterData): string {
 
   for (const section of data.sections) {
     msg += `\n<b>${section.category}</b>\n`;
-    const truncated =
-      section.summary.length > 500
-        ? section.summary.slice(0, 500) + '...'
-        : section.summary;
-    msg += `${truncated}\n`;
 
-    for (const link of section.tweetLinks.slice(0, 3)) {
-      msg += `🔗 <a href="${link.url}">@${link.author}</a>\n`;
+    for (const story of section.stories.slice(0, 3)) {
+      msg += `<b>${story.headline}</b>\n`;
+
+      for (const bullet of story.bullets.slice(0, 2)) {
+        msg += `• ${bullet}\n`;
+      }
+
+      for (const source of story.sources) {
+        msg += `🔗 <a href="${source.url}">@${source.author}</a>\n`;
+      }
     }
   }
 
