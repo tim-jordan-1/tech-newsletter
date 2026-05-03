@@ -7,7 +7,6 @@ import type { NewsletterData } from './types.js';
 const sampleData: NewsletterData = {
   title: 'Tech Weekly',
   date: '2026-04-25',
-  edition: 42,
   tldr: 'Big things happened.',
   sections: [
     {
@@ -29,11 +28,10 @@ const sampleData: NewsletterData = {
 };
 
 describe('formatTelegramMessage', () => {
-  test('includes title, date, and edition', () => {
+  test('includes title and date', () => {
     const msg = formatTelegramMessage(sampleData);
     assert.ok(msg.includes('Tech Weekly'));
     assert.ok(msg.includes('2026-04-25'));
-    assert.ok(msg.includes('Edition #42'));
   });
 
   test('includes tldr', () => {
