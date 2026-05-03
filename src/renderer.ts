@@ -1,24 +1,13 @@
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { resolve, dirname } from 'path';
 import ejs from 'ejs';
 import type { NewsletterData } from './types.js';
-
-function getEdition(): number {
-  const editionFile = resolve('.edition');
-  let edition = 1;
-  if (existsSync(editionFile)) {
-    edition = parseInt(readFileSync(editionFile, 'utf-8').trim(), 10) + 1;
-  }
-  writeFileSync(editionFile, String(edition), 'utf-8');
-  return edition;
-}
 
 export async function renderNewsletter(
   tldr: string,
   sections: NewsletterData['sections'],
   title: string
 ): Promise<{ html: string; filePath: string }> {
-  const edition = getEdition();
   const now = new Date();
   const date = now.toLocaleDateString('en-US', {
     weekday: 'long',
@@ -27,7 +16,7 @@ export async function renderNewsletter(
     day: 'numeric',
   });
 
-  const data: NewsletterData = { title, date, edition, tldr, sections };
+  const data: NewsletterData = { title, date, tldr, sections };
 
   const templatePath = resolve('templates', 'newsletter.ejs');
   const template = readFileSync(templatePath, 'utf-8');

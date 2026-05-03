@@ -46,7 +46,6 @@ program
             month: 'long',
             day: 'numeric',
           }),
-          edition: 0,
           tldr,
           sections,
         };

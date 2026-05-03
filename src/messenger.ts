@@ -4,8 +4,7 @@ import type { NewsletterData } from './types.js';
 import { getEnvOrThrow } from './config.js';
 
 export function formatTelegramMessage(data: NewsletterData): string {
-  let msg = `<b>🗞 ${data.title} — ${data.date}</b>\n`;
-  msg += `<i>Edition #${data.edition}</i>\n\n`;
+  let msg = `<b>🗞 ${data.title} — ${data.date}</b>\n\n`;
   msg += `<b>TL;DR:</b> ${data.tldr}\n`;
 
   for (const section of data.sections) {
