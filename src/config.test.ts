@@ -25,6 +25,5 @@ describe('loadConfig', () => {
     const config = loadConfig('./config.json');
     assert.ok(config.twitter.accounts.length > 0);
     assert.ok(config.newsletter.title);
-    assert.ok(Array.isArray(config.telegram.chatIds));
   });
 });

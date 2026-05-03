@@ -10,14 +10,9 @@ export interface NewsletterConfig {
   maxAge: string;
 }
 
-export interface TelegramConfig {
-  chatIds: string[];
-}
-
 export interface AppConfig {
   twitter: TwitterConfig;
   newsletter: NewsletterConfig;
-  telegram: TelegramConfig;
 }
 
 export interface ScrapedTweet {

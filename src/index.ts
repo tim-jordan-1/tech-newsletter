@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { loadConfig, parseMaxAge } from './config.js';
+import { loadConfig, parseMaxAge, getEnvOrThrow } from './config.js';
 import { scrapeTweets } from './scraper.js';
 import { summarizeTweets } from './summarizer.js';
 import { renderNewsletter } from './renderer.js';
@@ -36,7 +36,11 @@ program
       console.log('Step 3/4: Rendering newsletter...');
       const { html, filePath } = await renderNewsletter(tldr, sections, config.newsletter.title);
 
-      if (options.send && config.telegram.chatIds.length > 0) {
+      const chatIds: string[] = options.send
+        ? JSON.parse(getEnvOrThrow('TELEGRAM_CHAT_IDS'))
+        : [];
+
+      if (options.send && chatIds.length > 0) {
         console.log('Step 4/4: Sending via Telegram...');
         const data = {
           title: config.newsletter.title,
@@ -49,7 +53,7 @@ program
           tldr,
           sections,
         };
-        await sendTelegram(data, filePath, config.telegram.chatIds);
+        await sendTelegram(data, filePath, chatIds);
       } else {
         console.log('Step 4/4: Skipping Telegram delivery.');
       }
