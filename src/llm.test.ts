@@ -17,12 +17,14 @@ function mockClient(content: string): OpenAI {
 
 describe('callLLM', () => {
   test('returns trimmed content from API response', async () => {
+    resetThrottle();
     const client = mockClient('  summary text\n');
     const result = await callLLM('test prompt', undefined, client);
     assert.equal(result, 'summary text');
   });
 
   test('passes response_format when json option is true', async () => {
+    resetThrottle();
     let capturedParams: Record<string, unknown> = {};
     const client = {
       chat: {
@@ -40,6 +42,7 @@ describe('callLLM', () => {
   });
 
   test('does not pass response_format when json option is absent', async () => {
+    resetThrottle();
     let capturedParams: Record<string, unknown> = {};
     const client = {
       chat: {
@@ -57,6 +60,7 @@ describe('callLLM', () => {
   });
 
   test('throws on API errors', async () => {
+    resetThrottle();
     const client = {
       chat: {
         completions: {
