@@ -1,4 +1,4 @@
-import { callClaude } from './claude-cli.js';
+import { callLLM } from './llm.js';
 import type { ScrapedTweet, NewsletterSection, NewsletterStory } from './types.js';
 
 export function categorizeTweets(tweets: ScrapedTweet[], keywords: string[]): Map<string, ScrapedTweet[]> {
@@ -32,7 +32,7 @@ async function summarizeCategory(
     .map((t, i) => `[${i}] @${t.author}: ${t.text}`)
     .join('\n\n');
 
-  const raw = await callClaude(
+  const raw = await callLLM(
     `You are writing a section for a tech newsletter about "${category}".\n` +
     `Analyze these tweets and identify the distinct news stories.\n` +
     `For each story, provide:\n` +
@@ -48,16 +48,13 @@ async function summarizeCategory(
     `      "sourceIndices": [0, 2]\n` +
     `    }\n` +
     `  ]\n` +
-    `}\n` +
-    `No other text before or after the JSON.\n\n` +
-    `Tweets:\n${tweetText}`
+    `}\n\n` +
+    `Tweets:\n${tweetText}`,
+    { json: true }
   );
 
-  // Strip markdown code fences if present
-  const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
-
   try {
-    const parsed = JSON.parse(cleaned) as { stories: Array<{ headline: string; bullets: string[]; sourceIndices: number[] }> };
+    const parsed = JSON.parse(raw) as { stories: Array<{ headline: string; bullets: string[]; sourceIndices: number[] }> };
     const stories: NewsletterStory[] = parsed.stories.map((story) => ({
       headline: story.headline,
       bullets: story.bullets,
@@ -111,7 +108,7 @@ export async function summarizeTweets(
     const allHeadlines = sections
       .map((s) => `${s.category}: ${s.stories.map((st) => st.headline).join('; ')}`)
       .join('\n');
-    tldr = await callClaude(
+    tldr = await callLLM(
       `Write exactly 2-3 sentences as a TL;DR overview for a tech newsletter based on these section headlines. Use plain prose only — no markdown formatting, no bold, no headings, no bullet points.\n\n${allHeadlines}`
     );
   } catch (err) {
