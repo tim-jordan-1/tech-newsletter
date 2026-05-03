@@ -36,7 +36,7 @@ async function summarizeCategory(
     `You are writing a section for a tech newsletter about "${category}".\n` +
     `Analyze these tweets and identify the distinct news stories.\n` +
     `For each story, provide:\n` +
-    `- headline: a bold, concise one-line title\n` +
+    `- headline: a concise, plain-text one-line title\n` +
     `- bullets: 2-3 key detail points (short sentences, no markdown)\n` +
     `- sourceIndices: array of 0-based indices of which tweets are sources for this story\n\n` +
     `Return ONLY valid JSON in this exact format:\n` +
