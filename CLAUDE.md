@@ -39,7 +39,9 @@ Copy `.env.example` to `.env` and populate:
 The pipeline runs in four sequential steps, each implemented in its own module:
 
 1. **`scraper.ts`** — Authenticates to Twitter/X via cookie injection using `@the-convocation/twitter-scraper` and `tough-cookie`. Collects tweets from configured accounts and keyword searches, deduplicates by tweet ID, and filters by `maxAge`.
+1. **`scraper.ts`** — Authenticates to Twitter/X via cookie injection using `@the-convocation/twitter-scraper` and `tough-cookie`. Collects tweets from configured accounts and keyword searches, deduplicates by tweet ID, and filters by `maxAge`.
 
+2. **`summarizer.ts`** — Categorizes tweets by keyword match (first-match wins, uncategorized → "General"), then calls GPT-4o-mini via GitHub Models (through `llm.ts`) once per category to produce newsletter sections, plus a final TL;DR call across all sections.
 2. **`summarizer.ts`** — Categorizes tweets by keyword match (first-match wins, uncategorized → "General"), then calls GPT-4o-mini via GitHub Models (through `llm.ts`) once per category to produce newsletter sections, plus a final TL;DR call across all sections.
 
 3. **`renderer.ts`** — Renders the `templates/newsletter.ejs` template into HTML and writes it to `output/YYYY-MM-DD-newsletter.html`.
