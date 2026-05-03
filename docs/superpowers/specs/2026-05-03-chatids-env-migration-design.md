@@ -79,6 +79,15 @@ Remove the `config.telegram.chatIds` assertion — that field no longer exists o
 .env (TELEGRAM_CHAT_IDS) → index.ts (JSON.parse) → sendTelegram(chatIds)
 ```
 
+## Behavior: `--no-send` runs require no Telegram credentials
+
+When `--no-send` is passed, neither `TELEGRAM_CHAT_IDS` nor `TELEGRAM_BOT_TOKEN` need to be set:
+
+- The ternary in `index.ts` short-circuits to `[]` when `options.send` is false, so `getEnvOrThrow('TELEGRAM_CHAT_IDS')` is never called.
+- `sendTelegram` (which reads `TELEGRAM_BOT_TOKEN` internally) is only invoked when `options.send && chatIds.length > 0`, so `TELEGRAM_BOT_TOKEN` is also never read.
+
+This makes `--no-send` (and `--preview`) fully usable without any Telegram configuration in `.env`.
+
 ## What Is Not Changing
 
 - `messenger.ts` — already accepts `chatIds` as a parameter, no changes needed
