@@ -4,7 +4,7 @@ import { getEnvOrThrow } from './config.js';
 const MIN_DELAY_MS = 4000;
 let lastCallTime = -Infinity;
 
-/** Reset throttle state — exported for testing only. */
+/** @internal Test-only: resets module-level throttle state between tests. Do not call from production code. */
 export function resetThrottle(): void {
   lastCallTime = -Infinity;
 }
