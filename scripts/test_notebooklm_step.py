@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 # Allow importing notebooklm_step from the same directory
 sys.path.insert(0, str(Path(__file__).parent))
+import notebooklm_step
 
 
 def make_client_mock():
@@ -35,8 +36,10 @@ class TestNotebookLMStep(unittest.TestCase):
         self.tmp.flush()
         self.tmp.close()
         self.content_file = self.tmp.name
+        self._orig_argv = sys.argv[:]
 
     def tearDown(self):
+        sys.argv = self._orig_argv
         Path(self.content_file).unlink(missing_ok=True)
 
     @patch("notebooklm_step.NotebookLMClient")
@@ -50,7 +53,6 @@ class TestNotebookLMStep(unittest.TestCase):
             "--content-file", self.content_file,
         ]
 
-        import notebooklm_step
         exit_code = asyncio.run(notebooklm_step.main())
 
         self.assertEqual(exit_code, 0)
@@ -69,7 +71,6 @@ class TestNotebookLMStep(unittest.TestCase):
             "--content-file", self.content_file,
         ]
 
-        import notebooklm_step
         asyncio.run(notebooklm_step.main())
 
         call_args = client.sources.add_text.call_args
@@ -91,7 +92,6 @@ class TestNotebookLMStep(unittest.TestCase):
             "--content-file", self.content_file,
         ]
 
-        import notebooklm_step
         asyncio.run(notebooklm_step.main())
 
         client.artifacts.generate_audio.assert_called_once_with(
@@ -108,7 +108,6 @@ class TestNotebookLMStep(unittest.TestCase):
             "--content-file", self.content_file,
         ]
 
-        import notebooklm_step
         exit_code = asyncio.run(notebooklm_step.main())
 
         self.assertEqual(exit_code, 1)
