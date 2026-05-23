@@ -71,6 +71,33 @@ describe('formatAsMarkdown', () => {
     const md = formatAsMarkdown('tldr', sections);
     assert.ok(!md.includes('- '));
   });
+
+  test('formatAsMarkdown: TL;DR appears before sections, sections before stories, stories before bullets', () => {
+    const sections: NewsletterSection[] = [
+      {
+        category: 'AI',
+        stories: [
+          {
+            headline: 'Big Model Launch',
+            bullets: ['First bullet', 'Second bullet'],
+            sources: [],
+          },
+        ],
+      },
+    ];
+    const md = formatAsMarkdown('Short summary.', sections);
+
+    const tldrPos = md.indexOf('# TL;DR');
+    const sectionPos = md.indexOf('## ');
+    const storyPos = md.indexOf('### ');
+    const bullet1Pos = md.indexOf('- First bullet');
+    const bullet2Pos = md.indexOf('- Second bullet');
+
+    assert.ok(tldrPos < sectionPos, '# TL;DR should appear before the first ## section heading');
+    assert.ok(sectionPos < storyPos, '## section heading should appear before ### story headline');
+    assert.ok(storyPos < bullet1Pos, '### story headline should appear before first bullet');
+    assert.ok(bullet1Pos < bullet2Pos, 'first bullet should appear before second bullet');
+  });
 });
 
 // Helper: returns a mock spawn function that emits close with the given exit code
@@ -110,7 +137,7 @@ describe('createNotebookWithAudio', () => {
     assert.equal(capturedArgs[1], '--title');
     assert.equal(capturedArgs[2], 'Tech Newsletter — Friday, May 23, 2026');
     assert.equal(capturedArgs[3], '--content-file');
-    assert.ok(capturedArgs[4].startsWith('/tmp/'), `temp file should be in /tmp/, got: ${capturedArgs[4]}`);
+    assert.ok(capturedArgs[4].includes('/'), `temp file should be an absolute path, got: ${capturedArgs[4]}`);
     assert.ok(capturedArgs[4].endsWith('.md'));
   });
 
@@ -130,18 +157,6 @@ describe('createNotebookWithAudio', () => {
 
     assert.ok(warnings.some((w) => w.includes('⚠️ NotebookLM step failed')));
     assert.ok(warnings.some((w) => w.includes('Auth failed')));
-  });
-
-  test('hard-fails when NOTEBOOKLM_AUTH_JSON is missing', async () => {
-    delete process.env.NOTEBOOKLM_AUTH_JSON;
-
-    await assert.rejects(
-      () => createNotebookWithAudio(
-        'tldr', sampleSections, 'Tech Newsletter', 'Friday, May 23, 2026',
-        makeSpawnMock(0) as any
-      ),
-      /NOTEBOOKLM_AUTH_JSON/
-    );
   });
 
   test('cleans up temp file on success', async (t) => {

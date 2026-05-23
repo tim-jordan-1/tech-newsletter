@@ -1,6 +1,7 @@
 import { spawn as nodeSpawn } from 'child_process';
 import { writeFile, unlink } from 'fs/promises';
 import { randomUUID } from 'crypto';
+import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import type { NewsletterSection } from './types.js';
@@ -35,13 +36,9 @@ export async function createNotebookWithAudio(
   date: string,
   spawnFn = nodeSpawn
 ): Promise<void> {
-  if (!process.env.NOTEBOOKLM_AUTH_JSON) {
-    throw new Error('NOTEBOOKLM_AUTH_JSON is required for --with-notebooklm but is not set');
-  }
-
   const notebookTitle = `${title} — ${date}`;
   const content = formatAsMarkdown(tldr, sections);
-  const tempFile = `/tmp/${randomUUID()}.md`;
+  const tempFile = `${tmpdir()}/${randomUUID()}.md`;
   const scriptPath = resolve(__dirname, '../scripts/notebooklm_step.py');
 
   // writeFile errors propagate upward — only subprocess errors are soft-failed below

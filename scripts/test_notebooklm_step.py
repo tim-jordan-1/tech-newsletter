@@ -112,6 +112,17 @@ class TestNotebookLMStep(unittest.TestCase):
 
         self.assertEqual(exit_code, 1)
 
+    def test_returns_nonzero_when_content_file_does_not_exist(self):
+        sys.argv = [
+            "notebooklm_step.py",
+            "--title", "Test",
+            "--content-file", "/tmp/this-file-does-not-exist-abc123.md",
+        ]
+
+        exit_code = asyncio.run(notebooklm_step.main())
+
+        self.assertNotEqual(exit_code, 0)
+
 
 if __name__ == "__main__":
     unittest.main()
