@@ -12,9 +12,8 @@ async def main() -> int:
     parser.add_argument("--content-file", required=True, dest="content_file", help="Path to markdown content file")
     args = parser.parse_args()
 
-    content = Path(args.content_file).read_text(encoding="utf-8")
-
     try:
+        content = Path(args.content_file).read_text(encoding="utf-8")
         async with await NotebookLMClient.from_storage() as client:
             nb = await client.notebooks.create(args.title)
             await client.sources.add_text(nb.id, args.title, content, wait=True)

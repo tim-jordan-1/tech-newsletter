@@ -181,4 +181,30 @@ describe('createNotebookWithAudio', () => {
     const { access } = await import('fs/promises');
     await assert.rejects(() => access(tempFilePath), { code: 'ENOENT' });
   });
+
+  test('soft-fails when spawn emits error event', async (t) => {
+    process.env.NOTEBOOKLM_AUTH_JSON = '{"cookies":[]}';
+    t.after(() => { delete process.env.NOTEBOOKLM_AUTH_JSON; });
+
+    const warnings: string[] = [];
+    t.mock.method(console, 'warn', (msg: string) => warnings.push(msg));
+
+    const errorSpawn = (_cmd: string, _args: string[]) => {
+      const stderr = new EventEmitter();
+      const child = new EventEmitter() as EventEmitter & { stderr: EventEmitter };
+      child.stderr = stderr;
+      setImmediate(() => child.emit('error', new Error('spawn python3 ENOENT')));
+      return child;
+    };
+
+    await assert.doesNotReject(() =>
+      createNotebookWithAudio(
+        'tldr', sampleSections, 'Tech Newsletter', 'Friday, May 23, 2026',
+        errorSpawn as any
+      )
+    );
+
+    assert.ok(warnings.some((w) => w.includes('⚠️ NotebookLM step failed')));
+    assert.ok(warnings.some((w) => w.includes('spawn python3 ENOENT')));
+  });
 });
