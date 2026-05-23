@@ -59,4 +59,16 @@ describe('formatAsMarkdown', () => {
     assert.ok(md.includes('Summary.'));
     assert.ok(!md.includes('##'));
   });
+
+  test('story with no sources omits Sources line', () => {
+    const sections: NewsletterSection[] = [{ category: 'AI', stories: [{ headline: 'X', bullets: ['y'], sources: [] }] }];
+    const md = formatAsMarkdown('tldr', sections);
+    assert.ok(!md.includes('Sources:'));
+  });
+
+  test('story with no bullets produces no list items', () => {
+    const sections: NewsletterSection[] = [{ category: 'AI', stories: [{ headline: 'X', bullets: [], sources: [] }] }];
+    const md = formatAsMarkdown('tldr', sections);
+    assert.ok(!md.includes('- '));
+  });
 });
