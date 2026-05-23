@@ -36,7 +36,7 @@ program
       const { tldr, sections } = await summarizeTweets(tweets, config.twitter.keywords);
 
       console.log('Step 3/5: Rendering newsletter...');
-      const { html, filePath } = await renderNewsletter(tldr, sections, config.newsletter.title);
+      const { filePath } = await renderNewsletter(tldr, sections, config.newsletter.title);
 
       const date = new Date().toLocaleDateString('en-US', {
         weekday: 'long',
