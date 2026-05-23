@@ -44,6 +44,7 @@ export async function createNotebookWithAudio(
   const tempFile = `/tmp/${randomUUID()}.md`;
   const scriptPath = resolve(__dirname, '../scripts/notebooklm_step.py');
 
+  // writeFile errors propagate upward — only subprocess errors are soft-failed below
   await writeFile(tempFile, content, 'utf8');
 
   try {
@@ -51,9 +52,11 @@ export async function createNotebookWithAudio(
       const child = spawnFn('python3', [scriptPath, '--title', notebookTitle, '--content-file', tempFile]);
       let stderrOutput = '';
 
-      child.stderr!.on('data', (data: Buffer) => {
-        stderrOutput += data.toString();
-      });
+      if (child.stderr) {
+        child.stderr.on('data', (data: Buffer) => {
+          stderrOutput += data.toString();
+        });
+      }
 
       child.on('close', (code: number | null) => {
         if (code !== 0) {
