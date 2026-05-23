@@ -72,3 +72,113 @@ describe('formatAsMarkdown', () => {
     assert.ok(!md.includes('- '));
   });
 });
+
+// Helper: returns a mock spawn function that emits close with the given exit code
+function makeSpawnMock(exitCode: number, stderrText = '') {
+  return (_cmd: string, _args: string[]) => {
+    const stderr = new EventEmitter();
+    const child = new EventEmitter() as EventEmitter & { stderr: EventEmitter };
+    child.stderr = stderr;
+    setImmediate(() => {
+      if (stderrText) stderr.emit('data', Buffer.from(stderrText));
+      child.emit('close', exitCode);
+    });
+    return child;
+  };
+}
+
+describe('createNotebookWithAudio', () => {
+  test('passes correct args to python script', async (t) => {
+    process.env.NOTEBOOKLM_AUTH_JSON = '{"cookies":[]}';
+    t.after(() => { delete process.env.NOTEBOOKLM_AUTH_JSON; });
+
+    let capturedCmd = '';
+    let capturedArgs: string[] = [];
+    const mockSpawn = (cmd: string, args: string[]) => {
+      capturedCmd = cmd;
+      capturedArgs = [...args];
+      return makeSpawnMock(0)(cmd, args);
+    };
+
+    await createNotebookWithAudio(
+      'tldr', sampleSections, 'Tech Newsletter', 'Friday, May 23, 2026',
+      mockSpawn as any
+    );
+
+    assert.equal(capturedCmd, 'python3');
+    assert.ok(capturedArgs[0].endsWith('notebooklm_step.py'), `script path should end with notebooklm_step.py, got: ${capturedArgs[0]}`);
+    assert.equal(capturedArgs[1], '--title');
+    assert.equal(capturedArgs[2], 'Tech Newsletter — Friday, May 23, 2026');
+    assert.equal(capturedArgs[3], '--content-file');
+    assert.ok(capturedArgs[4].startsWith('/tmp/'), `temp file should be in /tmp/, got: ${capturedArgs[4]}`);
+    assert.ok(capturedArgs[4].endsWith('.md'));
+  });
+
+  test('soft-fails on non-zero exit: logs warning, does not throw', async (t) => {
+    process.env.NOTEBOOKLM_AUTH_JSON = '{"cookies":[]}';
+    t.after(() => { delete process.env.NOTEBOOKLM_AUTH_JSON; });
+
+    const warnings: string[] = [];
+    t.mock.method(console, 'warn', (msg: string) => warnings.push(msg));
+
+    await assert.doesNotReject(() =>
+      createNotebookWithAudio(
+        'tldr', sampleSections, 'Tech Newsletter', 'Friday, May 23, 2026',
+        makeSpawnMock(1, 'Auth failed') as any
+      )
+    );
+
+    assert.ok(warnings.some((w) => w.includes('⚠️ NotebookLM step failed')));
+    assert.ok(warnings.some((w) => w.includes('Auth failed')));
+  });
+
+  test('hard-fails when NOTEBOOKLM_AUTH_JSON is missing', async () => {
+    delete process.env.NOTEBOOKLM_AUTH_JSON;
+
+    await assert.rejects(
+      () => createNotebookWithAudio(
+        'tldr', sampleSections, 'Tech Newsletter', 'Friday, May 23, 2026',
+        makeSpawnMock(0) as any
+      ),
+      /NOTEBOOKLM_AUTH_JSON/
+    );
+  });
+
+  test('cleans up temp file on success', async (t) => {
+    process.env.NOTEBOOKLM_AUTH_JSON = '{"cookies":[]}';
+    t.after(() => { delete process.env.NOTEBOOKLM_AUTH_JSON; });
+
+    let tempFilePath = '';
+    const mockSpawn = (cmd: string, args: string[]) => {
+      tempFilePath = args[4];
+      return makeSpawnMock(0)(cmd, args);
+    };
+
+    await createNotebookWithAudio(
+      'tldr', sampleSections, 'Tech Newsletter', 'Friday, May 23, 2026',
+      mockSpawn as any
+    );
+
+    const { access } = await import('fs/promises');
+    await assert.rejects(() => access(tempFilePath), { code: 'ENOENT' });
+  });
+
+  test('cleans up temp file on failure', async (t) => {
+    process.env.NOTEBOOKLM_AUTH_JSON = '{"cookies":[]}';
+    t.after(() => { delete process.env.NOTEBOOKLM_AUTH_JSON; });
+
+    let tempFilePath = '';
+    const mockSpawn = (cmd: string, args: string[]) => {
+      tempFilePath = args[4];
+      return makeSpawnMock(1, 'Error')(cmd, args);
+    };
+
+    await createNotebookWithAudio(
+      'tldr', sampleSections, 'Tech Newsletter', 'Friday, May 23, 2026',
+      mockSpawn as any
+    );
+
+    const { access } = await import('fs/promises');
+    await assert.rejects(() => access(tempFilePath), { code: 'ENOENT' });
+  });
+});
