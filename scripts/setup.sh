@@ -149,9 +149,9 @@ cat <<'ROUTINE'
 To automate the newsletter daily via Claude Code:
 
 1. Create a routine at claude.ai/code (or in the Claude Code app):
-     Trigger : Daily cron — 8:00 AM AEST (Australia/Sydney)
-     Repository: tim-jordan-1/tech-newsletter
-     Prompt  : Run npm install && python3 -m pip install -r requirements.txt && npm run generate -- --with-notebooklm
+     Trigger    : Daily cron — 7:30 AM AEST (Australia/Sydney)
+     Repository : tim-jordan-1/tech-newsletter
+     Prompt     : Run npm install && python3 -m pip install -r requirements.txt && npm run generate -- --with-notebooklm
 
    Omit "--with-notebooklm" and the pip install if you don't need audio.
 
@@ -162,11 +162,15 @@ To automate the newsletter daily via Claude Code:
      GITHUB_MODELS_TOKEN
      NOTEBOOKLM_AUTH_JSON   (optional — only for --with-notebooklm)
 
-3. Enable unrestricted network access in the routine settings.
+   NOTEBOOKLM_AUTH_JSON: run this locally after login and paste the output:
+     cat ~/.notebooklm/storage_state.json
 
-NOTEBOOKLM_AUTH_JSON for the routine:
-  Run this locally after login and paste the output as the secret value:
-    cat ~/.notebooklm/storage_state.json
+3. Configure network access — either enable unrestricted access, or add these
+   domains to the allowlist:
+     x.com / twitter.com                  (tweet scraping)
+     models.inference.ai.azure.com        (GitHub Models / GPT-4o-mini)
+     api.telegram.org                     (Telegram delivery)
+     notebooklm.google.com                (required for --with-notebooklm)
 
 ROUTINE
 
