@@ -20,7 +20,7 @@ Automated tech newsletter pipeline that scrapes Twitter/X, summarizes with AI, a
 
 ### Quick setup (recommended)
 
-Run the interactive setup script — it installs dependencies, creates `.env`, and guides you through each credential:
+Run the interactive setup script — it installs dependencies, connects to notebooklm, creates `.env`, and guides you through each credential:
 
 ```bash
 bash scripts/setup.sh
