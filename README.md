@@ -184,7 +184,12 @@ To run the pipeline daily on Anthropic cloud infrastructure:
    | `GITHUB_MODELS_TOKEN` | GitHub PAT with `models:read` scope |
    | `NOTEBOOKLM_AUTH_JSON` | Content of `~/.notebooklm/storage_state.json` — only needed with `--with-notebooklm` |
 
-3. Enable **unrestricted network access** (the pipeline calls Twitter, GitHub Models API, Telegram API, and Google NotebookLM).
+3. Configure **network access** — the pipeline calls several external services:
+   - Enable unrestricted network access, **or** add these domains to the allowlist:
+     - `x.com` / `twitter.com` (scraping)
+     - `models.inference.ai.azure.com` (GitHub Models API)
+     - `api.telegram.org` (Telegram delivery)
+     - `notebooklm.google.com` (required for `--with-notebooklm` — omit if not using that flag)
 
 ### Getting `NOTEBOOKLM_AUTH_JSON` for the routine
 
