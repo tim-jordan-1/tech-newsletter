@@ -123,20 +123,20 @@ if [[ "$PYTHON_OK" == true ]]; then
     info "Running: python3 -m notebooklm login"
     python3 -m notebooklm login
     echo
-    if [[ -f "$HOME/.notebooklm/storage_state.json" ]]; then
+    if [[ -f "$HOME/.notebooklm/profiles/default/storage_state.json" ]]; then
       info "Adding NOTEBOOKLM_AUTH_JSON to .env..."
       # Remove existing entry if present, then append fresh value
       grep -v '^NOTEBOOKLM_AUTH_JSON=' .env > .env.tmp && mv .env.tmp .env || true
-      printf 'NOTEBOOKLM_AUTH_JSON=%s\n' "$(cat "$HOME/.notebooklm/storage_state.json")" >> .env
+      printf 'NOTEBOOKLM_AUTH_JSON=%s\n' "$(cat "$HOME/.notebooklm/profiles/default/storage_state.json")" >> .env
       success "NOTEBOOKLM_AUTH_JSON written to .env"
     else
-      warn "Login may have failed — ~/.notebooklm/storage_state.json not found."
+      warn "Login may have failed — ~/.notebooklm/profiles/default/storage_state.json not found."
       warn "Re-run 'python3 -m notebooklm login' manually."
     fi
   else
     echo "  Skipped. When ready, run:"
     echo "    python3 -m notebooklm login"
-    echo "    echo \"NOTEBOOKLM_AUTH_JSON=\$(cat ~/.notebooklm/storage_state.json)\" >> .env"
+    echo "    echo \"NOTEBOOKLM_AUTH_JSON=\$(cat ~/.notebooklm/profiles/default/storage_state.json)\" >> .env"
   fi
 fi
 
@@ -163,7 +163,7 @@ To automate the newsletter daily via Claude Code:
      NOTEBOOKLM_AUTH_JSON   (optional — only for --with-notebooklm)
 
    NOTEBOOKLM_AUTH_JSON: run this locally after login and paste the output:
-     cat ~/.notebooklm/storage_state.json
+     cat ~/.notebooklm/profiles/default/storage_state.json
 
 3. Configure network access — either enable unrestricted access, or add these
    domains to the allowlist:
